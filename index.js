@@ -66,7 +66,7 @@ window.addEventListener("load", async () => {
       }
 
       document.getElementById("iniciarPartida").addEventListener("click", () => {
-        const urlJuego = `juego.html?lobby=${lobby}&nombre=${encodeURIComponent(nombre)}`;
+        const urlJuego = `ajredez.html?lobby=${lobby}&nombre=${encodeURIComponent(nombre)}`;
         window.location.href = urlJuego;
       });
 
