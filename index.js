@@ -1,96 +1,48 @@
-const tabla = document.querySelector("table");
-const letras = ['a','b','c','d','e','f','g','h'];
-const piezasPorJugador = {
-  jugador1: {
-    peon: 8,
-    torre: 2,
-    caballo: 2,
-    alfil: 2,
-    reina: 1,
-    rey: 1
-  },
-  jugador2: {
-    peon: 8,
-    torre: 2,
-    caballo: 2,
-    alfil: 2,
-    reina: 1,
-    rey: 1
-  }
+// Importar Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+
+// Configuración de tu proyecto
+const firebaseConfig = {
+  apiKey: "AIzaSyBrRRbpqUToMUsfTb_XeAOMt_HcmHiDz14",
+  authDomain: "ajedrez-ciego.firebaseapp.com",
+  databaseURL: "https://ajedrez-ciego-default-rtdb.firebaseio.com",
+  projectId: "ajedrez-ciego",
+  storageBucket: "ajedrez-ciego.appspot.com",
+  messagingSenderId: "214392140581",
+  appId: "1:214392140581:web:a089e7007ec3071044a0cc",
+  measurementId: "G-S25HK9P8WW"
 };
 
+// Inicializar Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
-for (let fila = 0; fila <= 8; fila++) {
-  const tr = document.createElement("tr");
-
-  for (let col = 0; col <= 8; col++) {
-    const td = document.createElement("td");
-
-    // Esquina superior izquierda vacía
-    if (fila === 0 && col === 0) {
-      td.textContent = '';
-      td.classList.add('coord');
-    }
-    // Fila de letras (arriba)
-    else if (fila === 0) {
-      td.textContent = letras[col - 1];
-      td.classList.add('coord');
-    }
-    // Columna de números (izquierda)
-    else if (col === 0) {
-      td.textContent = 9 - fila; // del 8 al 1
-      td.classList.add('coord');
-    }
-    // Casillas reales del tablero
-    else {
-      const color = (fila + col) % 2 === 0 ? 'white' : 'black';
-      td.classList.add('casilla', color);
-
-      const letra = letras[col - 1];
-      const numero = 9 - fila;
-      td.id = letra + numero;
-    }
-
-    tr.appendChild(td);
-  }
-
-  tabla.appendChild(tr);
-}
-
-let turnoActual = 'jugador1';
-function colocarPieza(casillaId, tipo) {
-  const jugador = turnoActual;
-  const enemigo = jugador === 'jugador1' ? 'jugador2' : 'jugador1';
-
-  // Verificar si quedan piezas
-  if (piezasPorJugador[jugador][tipo] <= 0) {
-    alert("Ya no te quedan piezas de ese tipo");
+document.getElementById('crearLobby').addEventListener('click', () => {
+  const nombre = document.getElementById('nombre').value.trim();
+  if (!nombre) {
+    alert('Pon tu nombre we');
     return;
   }
 
-  // Verificar si hay pieza enemiga
-  const ocupante = tablero[casillaId];
-  if (ocupante) {
-    if (ocupante.jugador === enemigo && ocupante.tipo === "rey") {
-      alert(`${jugador} ha ganado al eliminar al rey enemigo`);
-      // fin del juego
-      return;
-    }
-  }
+  const lobbyId = Math.floor(1000 + Math.random() * 9000);
+  const lobbyRef = ref(database, 'lobbies/' + lobbyId);
 
-  // Colocar o reemplazar pieza
-  tablero[casillaId] = {
-    jugador,
-    tipo
-  };
+  // Guardar en Firebase
+  set(lobbyRef, {
+    jugador1: nombre,
+    jugador2: null
+  });
 
-  // Actualizar HTML (poner imagen en la celda)
-  const celda = document.getElementById(casillaId);
-  celda.innerHTML = `<img src="img/${jugador}_${tipo}.png">`;
+  // Mostrar en pantalla
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('lobby').style.display = 'block';
+  document.getElementById('tituloLobby').textContent = `Lobby #${lobbyId}`;
+  document.getElementById('jugador1Nombre').textContent = nombre;
 
-  // Restar pieza
-  piezasPorJugador[jugador][tipo]--;
-
-  // Cambiar turno
-  turnoActual = enemigo;
-}
+  const urlConLobby = `${window.location.origin}?lobby=${lobbyId}&nombre=${encodeURIComponent(nombre)}`;
+  document.getElementById('copiarLink').addEventListener('click', () => {
+    navigator.clipboard.writeText(urlConLobby);
+    alert("Enlace copiado");
+  });
+});
