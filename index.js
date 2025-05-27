@@ -20,7 +20,7 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 document.getElementById('crearLobby').addEventListener('click', () => {
-  const nombre = document.getElementById('nombre').value.trim();
+  const nombre = document.getElementById('nombreJugador1').value.trim();
   if (!nombre) {
     alert('Pon tu nombre we');
     return;
@@ -35,18 +35,11 @@ document.getElementById('crearLobby').addEventListener('click', () => {
     jugador2: null
   });
 
-  // Mostrar en pantalla
-  document.getElementById('menu').style.display = 'none';
-  document.getElementById('lobby').style.display = 'block';
-  document.getElementById('tituloLobby').textContent = `Lobby #${lobbyId}`;
-  document.getElementById('jugador1Nombre').textContent = nombre;
-
+  // Redirigir al lobby con parámetros en la URL
   const urlConLobby = `${window.location.origin}?lobby=${lobbyId}&nombre=${encodeURIComponent(nombre)}`;
-  document.getElementById('copiarLink').addEventListener('click', () => {
-    navigator.clipboard.writeText(urlConLobby);
-    alert("Enlace copiado");
-  });
+  window.location.href = urlConLobby;
 });
+
 
 // Función para leer parámetros de URL
 function obtenerParametros() {
