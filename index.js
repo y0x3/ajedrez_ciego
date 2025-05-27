@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
-// Firebase config
+// Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBrRRbpqUToMUsfTb_XeAOMt_HcmHiDz14",
   authDomain: "ajedrez-ciego.firebaseapp.com",
@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// 🔧 Utilidad para mostrar solo una sección
+// 🔁 Mostrar solo una sección
 function mostrarSeccion(idVisible) {
   const secciones = ["menu", "crearLobbySection", "unirseLobbySection", "lobby"];
   secciones.forEach(id => {
@@ -24,7 +24,7 @@ function mostrarSeccion(idVisible) {
   });
 }
 
-// 🔍 Leer parámetros de URL
+// 📦 Leer parámetros de URL
 function obtenerParametros() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -33,7 +33,7 @@ function obtenerParametros() {
   };
 }
 
-// 🧪 Detectar si ya hay un lobby activo en la URL
+// 🧪 Verificar si se debe mostrar directamente un lobby (desde URL)
 window.addEventListener("load", async () => {
   const { lobby, nombre } = obtenerParametros();
 
@@ -80,7 +80,7 @@ window.addEventListener("load", async () => {
   }
 });
 
-// 🎮 Eventos de navegación
+// 🎮 Navegación de botones
 document.getElementById("btnCrear").addEventListener("click", () => {
   mostrarSeccion("crearLobbySection");
 });
@@ -97,7 +97,7 @@ document.getElementById("volverDesdeUnirse").addEventListener("click", () => {
   mostrarSeccion("menu");
 });
 
-// 🔨 Crear un lobby
+// 🛠️ Crear Lobby
 document.getElementById("crearLobby").addEventListener("click", () => {
   const nombre = document.getElementById("nombreJugador1").value.trim();
   if (!nombre) {
@@ -108,23 +108,26 @@ document.getElementById("crearLobby").addEventListener("click", () => {
   const lobbyId = Math.floor(1000 + Math.random() * 9000);
   const lobbyRef = ref(database, 'lobbies/' + lobbyId);
 
+  // Esperar a que Firebase termine antes de redirigir
   set(lobbyRef, {
     jugador1: nombre,
     jugador2: null
+  }).then(() => {
+    const url = `${window.location.origin}?lobby=${lobbyId}&nombre=${encodeURIComponent(nombre)}`;
+    window.location.href = url;
+  }).catch((error) => {
+    console.error("Error al crear el lobby:", error);
+    alert("No se pudo crear el lobby.");
   });
-
-  // Redirige al lobby con parámetros en la URL
-  const url = `${window.location.origin}?lobby=${lobbyId}&nombre=${encodeURIComponent(nombre)}`;
-  window.location.href = url;
 });
 
-// 🔗 Unirse a un lobby
+// 👥 Unirse a Lobby
 document.getElementById("unirseLobby").addEventListener("click", () => {
   const nombre = document.getElementById("nombreJugador2").value.trim();
   const lobbyId = document.getElementById("codigoLobby").value.trim();
 
   if (!nombre || !lobbyId) {
-    alert("Faltan datos para unirse al lobby.");
+    alert("Faltan datos para unirse.");
     return;
   }
 
