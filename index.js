@@ -1,9 +1,7 @@
-// Importar Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
-import { get, child } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
-// Configuración de tu proyecto
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBrRRbpqUToMUsfTb_XeAOMt_HcmHiDz14",
   authDomain: "ajedrez-ciego.firebaseapp.com",
@@ -15,33 +13,18 @@ const firebaseConfig = {
   measurementId: "G-S25HK9P8WW"
 };
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-document.getElementById('crearLobby').addEventListener('click', () => {
-  const nombre = document.getElementById('nombreJugador1').value.trim();
-  if (!nombre) {
-    alert('Pon tu nombre we');
-    return;
-  }
-
-  const lobbyId = Math.floor(1000 + Math.random() * 9000);
-  const lobbyRef = ref(database, 'lobbies/' + lobbyId);
-
-  // Guardar en Firebase
-  set(lobbyRef, {
-    jugador1: nombre,
-    jugador2: null
+// 🔧 Utilidad para mostrar solo una sección
+function mostrarSeccion(idVisible) {
+  const secciones = ["menu", "crearLobbySection", "unirseLobbySection", "lobby"];
+  secciones.forEach(id => {
+    document.getElementById(id).style.display = (id === idVisible) ? "block" : "none";
   });
+}
 
-  // Redirigir al lobby con parámetros en la URL
-  const urlConLobby = `${window.location.origin}?lobby=${lobbyId}&nombre=${encodeURIComponent(nombre)}`;
-  window.location.href = urlConLobby;
-});
-
-
-// Función para leer parámetros de URL
+// 🔍 Leer parámetros de URL
 function obtenerParametros() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -50,40 +33,54 @@ function obtenerParametros() {
   };
 }
 
-// Verificar si hay datos en la URL al cargar la página
-window.addEventListener('load', async () => {
+// 🧪 Detectar si ya hay un lobby activo en la URL
+window.addEventListener("load", async () => {
   const { lobby, nombre } = obtenerParametros();
 
   if (lobby && nombre) {
-    // Mostrar el lobby en vez del menú
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('lobby').style.display = 'block';
-    document.getElementById('tituloLobby').textContent = `Lobby #${lobby}`;
+    mostrarSeccion("lobby");
 
     const lobbyRef = ref(database, 'lobbies/' + lobby);
     const snapshot = await get(lobbyRef);
 
     if (snapshot.exists()) {
       const data = snapshot.val();
+      let jugador1 = data.jugador1;
+      let jugador2 = data.jugador2;
 
-      // Si hay espacio, asignar al jugador2 si aún no está
-      if (!data.jugador2) {
-        await set(lobbyRef, {
-          jugador1: data.jugador1,
-          jugador2: nombre
-        });
+      if (!jugador1) {
+        await set(lobbyRef, { jugador1: nombre, jugador2: null });
+        jugador1 = nombre;
+      } else if (!jugador2 && nombre !== jugador1) {
+        await set(lobbyRef, { jugador1: jugador1, jugador2: nombre });
+        jugador2 = nombre;
       }
 
-      document.getElementById('jugador1Nombre').textContent = data.jugador1;
-      document.getElementById('jugador2Nombre').textContent = data.jugador2 || nombre;
+      document.getElementById("tituloLobby").textContent = `Lobby #${lobby}`;
+      document.getElementById("jugador1Nombre").textContent = jugador1 || 'Esperando...';
+      document.getElementById("jugador2Nombre").textContent = jugador2 || 'Esperando...';
+
+      if (jugador1 && jugador2) {
+        document.getElementById("estado").textContent = "¡Listo para iniciar!";
+        document.getElementById("iniciarPartida").style.display = "inline-block";
+      }
+
+      document.getElementById("iniciarPartida").addEventListener("click", () => {
+        const urlJuego = `juego.html?lobby=${lobby}&nombre=${encodeURIComponent(nombre)}`;
+        window.location.href = urlJuego;
+      });
+
     } else {
       alert("Este lobby no existe.");
-      // Podrías redirigir o mostrar un mensaje
+      window.location.href = "index.html";
     }
+
+  } else {
+    mostrarSeccion("menu");
   }
-  
 });
-// Mostrar secciones según el botón elegido
+
+// 🎮 Eventos de navegación
 document.getElementById("btnCrear").addEventListener("click", () => {
   mostrarSeccion("crearLobbySection");
 });
@@ -92,7 +89,6 @@ document.getElementById("btnUnirse").addEventListener("click", () => {
   mostrarSeccion("unirseLobbySection");
 });
 
-// Volver al menú desde cualquier sección
 document.getElementById("volverDesdeCrear").addEventListener("click", () => {
   mostrarSeccion("menu");
 });
@@ -101,10 +97,37 @@ document.getElementById("volverDesdeUnirse").addEventListener("click", () => {
   mostrarSeccion("menu");
 });
 
-// Función utilitaria para mostrar solo una sección
-function mostrarSeccion(idVisible) {
-  const secciones = ["menu", "crearLobbySection", "unirseLobbySection"];
-  secciones.forEach(id => {
-    document.getElementById(id).style.display = (id === idVisible) ? "block" : "none";
+// 🔨 Crear un lobby
+document.getElementById("crearLobby").addEventListener("click", () => {
+  const nombre = document.getElementById("nombreJugador1").value.trim();
+  if (!nombre) {
+    alert("Escribe tu nombre.");
+    return;
+  }
+
+  const lobbyId = Math.floor(1000 + Math.random() * 9000);
+  const lobbyRef = ref(database, 'lobbies/' + lobbyId);
+
+  set(lobbyRef, {
+    jugador1: nombre,
+    jugador2: null
   });
-}
+
+  // Redirige al lobby con parámetros en la URL
+  const url = `${window.location.origin}?lobby=${lobbyId}&nombre=${encodeURIComponent(nombre)}`;
+  window.location.href = url;
+});
+
+// 🔗 Unirse a un lobby
+document.getElementById("unirseLobby").addEventListener("click", () => {
+  const nombre = document.getElementById("nombreJugador2").value.trim();
+  const lobbyId = document.getElementById("codigoLobby").value.trim();
+
+  if (!nombre || !lobbyId) {
+    alert("Faltan datos para unirse al lobby.");
+    return;
+  }
+
+  const url = `${window.location.origin}?lobby=${lobbyId}&nombre=${encodeURIComponent(nombre)}`;
+  window.location.href = url;
+});

@@ -1,101 +1,51 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Lobby - Ajedrez Ciego</title>
-  <link rel="stylesheet" href="index.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>♟ Ajedrez Ciego</title>
+  <link rel="stylesheet" href="index.css" />
 </head>
 <body>
   <main>
-    <h1 id="tituloLobby">Lobby</h1>
-
-    <div id="contenedorLobby" style="margin: 2rem 0; text-align: center;">
-      <div id="jugador1Nombre" style="font-size: 1.5rem; margin-bottom: 1rem;">Jugador 1</div>
-      <div style="font-size: 1.2rem; font-weight: bold;">VS</div>
-      <div id="jugador2Nombre" style="font-size: 1.5rem; margin-top: 1rem;">Jugador 2</div>
+    <!-- MENÚ PRINCIPAL -->
+    <div id="menu">
+      <h1>♟ Ajedrez Ciego ♟</h1>
+      <button id="btnCrear">Crear Lobby</button>
+      <button id="btnUnirse">Unirse a Lobby</button>
     </div>
 
-    <div id="estado" style="font-weight: bold; color: green; margin-bottom: 1rem;"></div>
+    <!-- CREAR LOBBY -->
+    <div id="crearLobbySection" style="display: none;">
+      <h2>Crear Lobby</h2>
+      <input type="text" id="nombreJugador1" placeholder="Tu nombre" />
+      <button id="crearLobby">Invitar</button>
+      <button id="volverDesdeCrear">⬅ Volver</button>
+    </div>
 
-    <button id="iniciarPartida" style="display: none;">Iniciar partida</button>
-    <br><br>
-    <button onclick="window.location.href='index.html'">⬅ Volver al menú</button>
+    <!-- UNIRSE A LOBBY -->
+    <div id="unirseLobbySection" style="display: none;">
+      <h2>Unirse a Lobby</h2>
+      <input type="text" id="nombreJugador2" placeholder="Tu nombre" />
+      <input type="text" id="codigoLobby" placeholder="Código de lobby" />
+      <button id="unirseLobby">Entrar</button>
+      <button id="volverDesdeUnirse">⬅ Volver</button>
+    </div>
+
+    <!-- LOBBY MOSTRADO -->
+    <div id="lobby" style="display: none;">
+      <h2 id="tituloLobby">Lobby</h2>
+      <div style="margin: 2rem 0; text-align: center;">
+        <div id="jugador1Nombre" style="font-size: 1.5rem; margin-bottom: 1rem;">Jugador 1</div>
+        <div style="font-size: 1.2rem; font-weight: bold;">VS</div>
+        <div id="jugador2Nombre" style="font-size: 1.5rem; margin-top: 1rem;">Jugador 2</div>
+      </div>
+      <div id="estado" style="font-weight: bold; color: green; margin-bottom: 1rem;"></div>
+      <button id="iniciarPartida" style="display: none;">Iniciar partida</button>
+      <button onclick="window.location.href='index.html'">⬅ Volver al menú</button>
+    </div>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBrRRbpqUToMUsfTb_XeAOMt_HcmHiDz14",
-      authDomain: "ajedrez-ciego.firebaseapp.com",
-      databaseURL: "https://ajedrez-ciego-default-rtdb.firebaseio.com",
-      projectId: "ajedrez-ciego",
-      storageBucket: "ajedrez-ciego.appspot.com",
-      messagingSenderId: "214392140581",
-      appId: "1:214392140581:web:a089e7007ec3071044a0cc",
-      measurementId: "G-S25HK9P8WW"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    function obtenerParametros() {
-      const params = new URLSearchParams(window.location.search);
-      return {
-        lobby: params.get("lobby"),
-        nombre: params.get("nombre")
-      };
-    }
-
-    async function cargarLobby() {
-      const { lobby, nombre } = obtenerParametros();
-      if (!lobby || !nombre) {
-        alert("Faltan datos de la lobby.");
-        window.location.href = "index.html";
-        return;
-      }
-
-      document.getElementById("tituloLobby").textContent = `Lobby #${lobby}`;
-      const lobbyRef = ref(database, 'lobbies/' + lobby);
-      const snapshot = await get(lobbyRef);
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-
-        let jugador1 = data.jugador1;
-        let jugador2 = data.jugador2;
-
-        if (!jugador1) {
-          // Primera persona se convierte en jugador1
-          await set(lobbyRef, { jugador1: nombre, jugador2: null });
-          jugador1 = nombre;
-        } else if (!jugador2 && nombre !== jugador1) {
-          // Segunda persona se convierte en jugador2
-          await set(lobbyRef, { jugador1: jugador1, jugador2: nombre });
-          jugador2 = nombre;
-        }
-
-        document.getElementById('jugador1Nombre').textContent = jugador1 || 'Esperando...';
-        document.getElementById('jugador2Nombre').textContent = jugador2 || 'Esperando...';
-
-        if (jugador1 && jugador2) {
-          document.getElementById('estado').textContent = "¡Listo para iniciar!";
-          document.getElementById('iniciarPartida').style.display = "inline-block";
-        }
-
-        document.getElementById("iniciarPartida").addEventListener("click", () => {
-          const urlJuego = `juego.html?lobby=${lobby}&nombre=${encodeURIComponent(nombre)}`;
-          window.location.href = urlJuego;
-        });
-
-      } else {
-        alert("Este lobby no existe.");
-        window.location.href = "index.html";
-      }
-    }
-
-    window.addEventListener("load", cargarLobby);
-  </script>
+  <script type="module" src="index.js"></script>
 </body>
 </html>
