@@ -1,24 +1,55 @@
+.contenedor-general {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 20px;
+}
+
+.fila-coord {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.col-coord {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.zona-juego {
+  display: flex;
+  align-items: center;
+}
+
+.marco-tablero {
+  border: 4px solid black;
+  display: inline-block;
+}
+
 table {
-    border-collapse: collapse;
-    margin-left: auto;
-    margin-right: auto;
+  border-collapse: collapse;
 }
+
 td {
-    width: 80px;
-    height: 80px;
+  width: 80px;
+  height: 80px;
 }
-.black {
-    background-color: #769656;
-}
+
 .white {
-    background-color: #eeeed2;
+  background-color: #eeeed2;
 }
 
-#tituloP {
-    text-align: center;
-    font-size: 2em;
-    color: #333;
-    margin-top: 20px;
+.black {
+  background-color: #769656;
 }
 
-
+.casilla {
+  text-align: center;
+}
