@@ -88,4 +88,30 @@ window.addEventListener('load', async () => {
       // Podrías redirigir o mostrar un mensaje
     }
   }
+  
 });
+// Mostrar secciones según el botón elegido
+document.getElementById("btnCrear").addEventListener("click", () => {
+  mostrarSeccion("crearLobbySection");
+});
+
+document.getElementById("btnUnirse").addEventListener("click", () => {
+  mostrarSeccion("unirseLobbySection");
+});
+
+// Volver al menú desde cualquier sección
+document.getElementById("volverDesdeCrear").addEventListener("click", () => {
+  mostrarSeccion("menu");
+});
+
+document.getElementById("volverDesdeUnirse").addEventListener("click", () => {
+  mostrarSeccion("menu");
+});
+
+// Función utilitaria para mostrar solo una sección
+function mostrarSeccion(idVisible) {
+  const secciones = ["menu", "crearLobbySection", "unirseLobbySection"];
+  secciones.forEach(id => {
+    document.getElementById(id).style.display = (id === idVisible) ? "block" : "none";
+  });
+}

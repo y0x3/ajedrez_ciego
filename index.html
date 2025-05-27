@@ -3,28 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="index.css" />
   <title>♟ Ajedrez Ciego</title>
+  <link rel="stylesheet" href="index.css" />
 </head>
 <body>
   <main>
+    <!-- Menú Principal -->
     <div id="menu">
       <h1>♟ Ajedrez Ciego ♟</h1>
-      <input type="text" id="nombre" placeholder="Tu nombre" />
-      <button id="crearLobby">Invitar</button>
+      <button id="btnCrear">Crear lobby</button>
+      <button id="btnUnirse">Unirse a lobby</button>
     </div>
 
-    <div id="lobby" style="display: none;">
-      <h2 id="tituloLobby">Lobby #0000</h2>
-      <div style="display: flex; justify-content: space-between;">
-        <div><strong>JUGADOR 1:</strong> <span id="jugador1Nombre"></span></div>
-        <div><strong>JUGADOR 2:</strong> <span id="jugador2Nombre">Esperando...</span></div>
+    <!-- Sección Crear Lobby -->
+    <div id="crearLobbySection" style="display: none;">
+      <h2>Crear nuevo lobby</h2>
+      <input type="text" id="nombreJugador1" placeholder="Tu nombre" />
+      <div style="margin-top: 1rem;">
+        <button id="crearLobby">Crear</button>
+        <button id="volverDesdeCrear">⬅ Volver</button>
       </div>
-      <button id="copiarLink">Copiar enlace</button>
+    </div>
+
+    <!-- Sección Unirse a Lobby -->
+    <div id="unirseLobbySection" style="display: none;">
+      <h2>Unirse a un lobby</h2>
+      <input type="text" id="nombreJugador2" placeholder="Tu nombre" />
+      <input type="text" id="codigoLobby" placeholder="Código del lobby (ej: 4821)" />
+      <div style="margin-top: 1rem;">
+        <button id="unirseLobby">Unirse</button>
+        <button id="volverDesdeUnirse">⬅ Volver</button>
+      </div>
     </div>
   </main>
 
-  <!-- Cargar Firebase como módulo desde JS -->
   <script type="module" src="index.js"></script>
 </body>
 </html>
