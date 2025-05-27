@@ -1,3 +1,5 @@
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+
 //CREACION DE TABLERO DE AJEDREZ
 
 const letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -26,6 +28,14 @@ for (let row = 0; row < 8; row++) {
 }
 
 //LOGICA DEL TABLERO
+function obtenerParametros() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    lobby: params.get("lobby"),
+    nombre: params.get("nombre")
+  };
+}
+
 const { lobby, nombre } = obtenerParametros();
 const db = getDatabase();
 const lobbyRef = ref(db, `lobbies/${lobby}`);
