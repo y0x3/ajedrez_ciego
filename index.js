@@ -53,6 +53,8 @@ document.getElementById("volverDesdeUnirse").addEventListener("click", () => {
 // 🛠️ Crear lobby
 document.getElementById("crearLobby").addEventListener("click", () => {
   const nombre = document.getElementById("nombreJugador1").value.trim();
+  const tiempo = parseInt(document.getElementById("tiempo").value);
+
   if (!nombre) {
     alert("Escribe tu nombre.");
     return;
@@ -63,15 +65,15 @@ document.getElementById("crearLobby").addEventListener("click", () => {
 
   set(lobbyRef, {
     jugador1: nombre,
-    jugador2: null
+    jugador2: null,
+    iniciar: false,
+    tiempoPorJugador: tiempo
   }).then(() => {
     const url = `${window.location.origin}?lobby=${lobbyId}&nombre=${encodeURIComponent(nombre)}`;
     window.location.href = url;
-  }).catch((error) => {
-    console.error("Error al crear el lobby:", error);
-    alert("No se pudo crear el lobby.");
   });
 });
+
 
 // 👥 Unirse a lobby
 document.getElementById("unirseLobby").addEventListener("click", () => {
@@ -141,10 +143,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // 🟢 Iniciar partida (botón)
         document.getElementById("iniciarPartida").addEventListener("click", async () => {
+          const tiempo = data.tiempoPorJugador || 300;
+
           await set(lobbyRef, {
             jugador1: jugador1,
             jugador2: jugador2,
-            iniciar: true
+            iniciar: true,
+            turno: 'jugador1',
+            tiempo1: tiempo,
+            tiempo2: tiempo,
+            tiempoPorJugador: tiempo
           });
         });
 

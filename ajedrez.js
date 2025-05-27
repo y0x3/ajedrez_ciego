@@ -1,3 +1,5 @@
+//CREACION DE TABLERO DE AJEDREZ
+
 const letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const numeros = [8, 7, 6, 5, 4, 3, 2, 1];
 
@@ -22,3 +24,89 @@ for (let row = 0; row < 8; row++) {
   }
   tablero.appendChild(tr);
 }
+
+//LOGICA DEL TABLERO
+const { lobby, nombre } = obtenerParametros();
+const db = getDatabase();
+const lobbyRef = ref(db, `lobbies/${lobby}`);
+
+let intervalo;
+let soyJugador1 = false;
+let tiempo1 = 0;
+let tiempo2 = 0;
+
+onValue(lobbyRef, (snapshot) => {
+  const data = snapshot.val();
+  if (!data) return;
+
+  soyJugador1 = data.jugador1 === nombre;
+
+  document.getElementById("nombre-j1").textContent = data.jugador1;
+  document.getElementById("nombre-j2").textContent = data.jugador2;
+  tiempo1 = data.tiempo1;
+  tiempo2 = data.tiempo2;
+
+  actualizarTiempos();
+
+  if (data.iniciar && !temporizadorIniciado) {
+    temporizadorIniciado = true;
+
+    const msg = document.getElementById("mensajeInicio");
+    msg.style.display = "block";
+    setTimeout(() => {
+      msg.style.display = "none";
+      iniciarTemporizador(data.turno);
+    }, 2000);
+  }
+});
+
+function actualizarTiempos() {
+  document.getElementById("tiempo-j1").textContent = formatearTiempo(tiempo1);
+  document.getElementById("tiempo-j2").textContent = formatearTiempo(tiempo2);
+}
+
+function formatearTiempo(segundos) {
+  const m = Math.floor(segundos / 60).toString().padStart(2, '0');
+  const s = (segundos % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function iniciarTemporizador(turnoActual) {
+  clearInterval(intervalo);
+
+  intervalo = setInterval(() => {
+    if (turnoActual === 'jugador1') {
+      tiempo1--;
+    } else {
+      tiempo2--;
+    }
+
+    updateTiemposEnFirebase(tiempo1, tiempo2, turnoActual);
+    actualizarTiempos();
+
+    if (tiempo1 <= 0 || tiempo2 <= 0) {
+      clearInterval(intervalo);
+      alert("¡Tiempo agotado!");
+    }
+  }, 1000);
+}
+
+function updateTiemposEnFirebase(t1, t2, turnoActual) {
+  set(ref(db, `lobbies/${lobby}`), {
+    tiempo1: t1,
+    tiempo2: t2,
+    turno: turnoActual,
+    jugador1: document.getElementById("nombre-j1").textContent,
+    jugador2: document.getElementById("nombre-j2").textContent,
+    iniciar: true
+  });
+}
+
+//cambiar turno al hacer click en una casilla
+document.querySelectorAll("td").forEach(casilla => {
+  casilla.addEventListener("click", () => {
+    // Solo puede cambiar turno quien tiene el turno actual
+    const nuevoTurno = soyJugador1 ? 'jugador2' : 'jugador1';
+    set(ref(db, `lobbies/${lobby}/turno`), nuevoTurno);
+  });
+});

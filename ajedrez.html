@@ -13,19 +13,29 @@
   <h1 id="tituloP">AJEDREZ - CIEGO</h1>
 
   <div class="contenedor-general">
-    <div class="fila-coord letras" id="letras-arriba"></div>
+        <div id="hud-jugador1" class="hud">
+            <span id="nombre-j1">Jugador 1</span>
+            <span id="tiempo-j1">05:00</span>
+        </div>
 
-    <div class="zona-juego">
-      <div class="col-coord numeros" id="numeros-izquierda"></div>
+        <div class="fila-coord letras" id="letras-arriba"></div>
 
-      <div class="marco-tablero">
-        <table id="tablero"></table>
-      </div>
+        <div class="zona-juego">
+        <div class="col-coord numeros" id="numeros-izquierda"></div>
 
-      <div class="col-coord numeros" id="numeros-derecha"></div>
-    </div>
+        <div class="marco-tablero">
+            <table id="tablero"></table>
+        </div>
 
-    <div class="fila-coord letras" id="letras-abajo"></div>
+        <div class="col-coord numeros" id="numeros-derecha"></div>
+        </div>
+
+        <div class="fila-coord letras" id="letras-abajo"></div>
+        <div id="hud-jugador2" class="hud">
+            <span id="nombre-j2">Jugador 2</span>
+            <span id="tiempo-j2">05:00</span>
+        </div>
+        <div id="mensajeInicio" class="mensaje-inicio">¡Inicio!</div>
   </div>
 </main>
 
