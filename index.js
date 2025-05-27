@@ -91,57 +91,59 @@ document.getElementById("unirseLobby").addEventListener("click", () => {
 document.addEventListener("DOMContentLoaded", () => {
   const { lobby, nombre } = obtenerParametros();
 
-  if (!lobby || !nombre) {
-    mostrarSeccion("menu");
+  if (lobby && !nombre) {
+    mostrarSeccion("unirseLobbySection");
+    document.getElementById("codigoLobby").value = lobby;
     return;
   }
 
-  mostrarSeccion("lobby");
+  if (lobby && nombre) {
+    mostrarSeccion("lobby");
 
-  const lobbyRef = ref(database, 'lobbies/' + lobby);
+    const lobbyRef = ref(database, 'lobbies/' + lobby);
 
-  onValue(lobbyRef, async (snapshot) => {
-    if (!snapshot.exists()) {
-      alert("Este lobby no existe.");
-      window.location.href = "index.html";
-      return;
-    }
+    onValue(lobbyRef, async (snapshot) => {
+      if (!snapshot.exists()) {
+        alert("Este lobby no existe.");
+        window.location.href = "index.html";
+        return;
+      }
 
-    const data = snapshot.val();
-    let jugador1 = data.jugador1;
-    let jugador2 = data.jugador2;
+      const data = snapshot.val();
+      let jugador1 = data.jugador1;
+      let jugador2 = data.jugador2;
 
-    // Autoasignación de jugador2 si no está y este nombre es diferente al jugador1
-    if (!jugador1) {
-      await set(lobbyRef, { jugador1: nombre, jugador2: null });
-      jugador1 = nombre;
-    } else if (!jugador2 && nombre !== jugador1) {
-      await set(lobbyRef, { jugador1: jugador1, jugador2: nombre });
-      jugador2 = nombre;
-    }
+      if (!jugador1) {
+        await set(lobbyRef, { jugador1: nombre, jugador2: null });
+        jugador1 = nombre;
+      } else if (!jugador2 && nombre !== jugador1) {
+        await set(lobbyRef, { jugador1: jugador1, jugador2: nombre });
+        jugador2 = nombre;
+      }
 
-    document.getElementById("tituloLobby").textContent = `Lobby #${lobby}`;
-    document.getElementById("jugador1Nombre").textContent = jugador1 || 'Esperando...';
-    document.getElementById("jugador2Nombre").textContent = jugador2 || 'Esperando...';
+      document.getElementById("tituloLobby").textContent = `Lobby #${lobby}`;
+      document.getElementById("jugador1Nombre").textContent = jugador1 || 'Esperando...';
+      document.getElementById("jugador2Nombre").textContent = jugador2 || 'Esperando...';
 
-    if (jugador1 && jugador2) {
-      document.getElementById("estado").textContent = "¡Listo para iniciar!";
-      document.getElementById("iniciarPartida").style.display = "inline-block";
-    }
+      if (jugador1 && jugador2) {
+        document.getElementById("estado").textContent = "¡Listo para iniciar!";
+        document.getElementById("iniciarPartida").style.display = "inline-block";
+      }
 
-    // Copiar enlace
-    const urlLobby = `${window.location.origin}?lobby=${lobby}&nombre=`;
-    document.getElementById("copiarLink").addEventListener("click", () => {
-      navigator.clipboard.writeText(urlLobby).then(() => {
-        alert("¡Enlace copiado! Comparte el link para que se unan.");
-      }).catch(() => {
-        alert("No se pudo copiar el enlace.");
+      const urlLobby = `${window.location.origin}?lobby=${lobby}&nombre=`;
+      document.getElementById("copiarLink").addEventListener("click", () => {
+        navigator.clipboard.writeText(urlLobby).then(() => {
+          alert("¡Enlace copiado!");
+        });
+      });
+
+      document.getElementById("iniciarPartida").addEventListener("click", () => {
+        window.location.href = `ajedrez.html?lobby=${lobby}&nombre=${encodeURIComponent(nombre)}`;
       });
     });
 
-    // Iniciar partida
-    document.getElementById("iniciarPartida").addEventListener("click", () => {
-      window.location.href = `ajedrez.html?lobby=${lobby}&nombre=${encodeURIComponent(nombre)}`;
-    });
-  });
+  } else {
+    mostrarSeccion("menu");
+  }
 });
+
