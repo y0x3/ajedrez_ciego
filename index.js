@@ -114,10 +114,14 @@ document.addEventListener("DOMContentLoaded", () => {
       let jugador2 = data.jugador2;
 
       if (!jugador1) {
-        await set(lobbyRef, { jugador1: nombre, jugador2: null });
-        jugador1 = nombre;
+      await set(lobbyRef, { jugador1: nombre, jugador2: null, iniciar: false });
+      jugador1 = nombre;
       } else if (!jugador2 && nombre !== jugador1) {
-        await set(lobbyRef, { jugador1: jugador1, jugador2: nombre });
+        await set(lobbyRef, {
+          jugador1: jugador1,
+          jugador2: nombre,
+          iniciar: false
+        });
         jugador2 = nombre;
       }
 
@@ -129,18 +133,29 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("estado").textContent = "¡Listo para iniciar!";
         document.getElementById("iniciarPartida").style.display = "inline-block";
       }
+      //  Detectar si ya comenzó la partida
+      if (data.iniciar === true) {
+        window.location.href = `ajedrez.html?lobby=${lobby}&nombre=${encodeURIComponent(nombre)}`;
+        return;
+      }
 
-      const urlLobby = `${window.location.origin}?lobby=${lobby}&nombre=`;
-      document.getElementById("copiarLink").addEventListener("click", () => {
-        navigator.clipboard.writeText(urlLobby).then(() => {
-          alert("¡Enlace copiado!");
+      // 🟢 Iniciar partida (botón)
+        document.getElementById("iniciarPartida").addEventListener("click", async () => {
+          await set(lobbyRef, {
+            jugador1: jugador1,
+            jugador2: jugador2,
+            iniciar: true
+          });
+        });
+
+        // 📋 Copiar link
+        const urlLobby = `${window.location.origin}?lobby=${lobby}&nombre=`;
+        document.getElementById("copiarLink").addEventListener("click", () => {
+          navigator.clipboard.writeText(urlLobby).then(() => {
+            alert("¡Enlace copiado!");
+          });
         });
       });
-
-      document.getElementById("iniciarPartida").addEventListener("click", () => {
-        window.location.href = `ajedrez.html?lobby=${lobby}&nombre=${encodeURIComponent(nombre)}`;
-      });
-    });
 
   } else {
     mostrarSeccion("menu");
