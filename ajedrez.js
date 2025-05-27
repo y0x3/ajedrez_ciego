@@ -1,4 +1,20 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBrRRbpqUToMUsfTb_XeAOMt_HcmHiDz14",
+  authDomain: "ajedrez-ciego.firebaseapp.com",
+  databaseURL: "https://ajedrez-ciego-default-rtdb.firebaseio.com",
+  projectId: "ajedrez-ciego",
+  storageBucket: "ajedrez-ciego.appspot.com",
+  messagingSenderId: "214392140581",
+  appId: "1:214392140581:web:a089e7007ec3071044a0cc",
+  measurementId: "G-S25HK9P8WW"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
 //CREACION DE TABLERO DE AJEDREZ
 
@@ -28,6 +44,7 @@ for (let row = 0; row < 8; row++) {
 }
 
 //LOGICA DEL TABLERO
+let temporizadorIniciado = false;
 function obtenerParametros() {
   const params = new URLSearchParams(window.location.search);
   return {
