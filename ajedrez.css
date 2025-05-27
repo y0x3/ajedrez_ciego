@@ -2,23 +2,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 10px;
   margin-top: 20px;
 }
 
 .fila-coord {
   display: flex;
   justify-content: center;
-  gap: 5px;
-  font-weight: bold;
-  font-family: monospace;
+  width: calc(80px * 8);
 }
 
-.col-coord {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
+.fila-coord span {
+  display: inline-block;
+  width: 80px;
+  height: 20px;
+  text-align: center;
   font-weight: bold;
   font-family: monospace;
 }
@@ -26,6 +24,23 @@
 .zona-juego {
   display: flex;
   align-items: center;
+}
+
+.col-coord {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: calc(80px * 8);
+}
+
+.col-coord span {
+  display: inline-block;
+  width: 20px;
+  height: 80px;
+  text-align: center;
+  line-height: 80px;
+  font-weight: bold;
+  font-family: monospace;
 }
 
 .marco-tablero {
@@ -52,4 +67,11 @@ td {
 
 .casilla {
   text-align: center;
+}
+
+#tituloP {
+  text-align: center;
+  font-size: 2.5em;
+  color: #333;
+  margin-top: 20px;
 }
