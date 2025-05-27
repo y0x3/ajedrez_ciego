@@ -137,3 +137,49 @@ document.querySelectorAll("td").forEach(casilla => {
     set(ref(db, `lobbies/${lobby}/turno`), nuevoTurno);
   });
 });
+
+
+//LOGICA DE MENU DE PIEZAS
+// Función para agregar el menú de piezas
+const piezasBlancas = [
+  { nombre: 'PeonBlanco.png', cantidad: 8 },
+  { nombre: 'TorreBlanca.png', cantidad: 2 },
+  { nombre: 'CaballoBlanco.png', cantidad: 2 },
+  { nombre: 'AlfilBlanco.png', cantidad: 2 },
+  { nombre: 'ReyBlanco.png', cantidad: 1 },
+  { nombre: 'ReynaBlanca.png', cantidad: 1 }
+];
+
+const piezasNegras = [
+  { nombre: 'PeonNegro.png', cantidad: 8 },
+  { nombre: 'TorreNegra.png', cantidad: 2 },
+  { nombre: 'CaballoNegro.png', cantidad: 2 },
+  { nombre: 'AlfilNegro.png', cantidad: 2 },
+  { nombre: 'ReyNegro.png', cantidad: 1 },
+  { nombre: 'ReynaNegra.png', cantidad: 1 }
+];
+
+function mostrarMenuPiezas(color) {
+  const menu = document.getElementById('menu-piezas');
+  menu.innerHTML = '';
+  const piezas = color === 'blanco' ? piezasBlancas : piezasNegras;
+  piezas.forEach(pieza => {
+    for (let i = 0; i < pieza.cantidad; i++) {
+      const img = document.createElement('img');
+      img.src = `assets/${pieza.nombre}`;
+      img.alt = pieza.nombre;
+      menu.appendChild(img);
+    }
+  });
+}
+
+
+// Mostrar solo el menú correspondiente al jugador
+if (soyJugador1) {
+  mostrarMenuPiezas('blanco');
+  document.getElementById('menu-piezas').style.display = 'block';
+} else {
+  mostrarMenuPiezas('negro');
+  document.getElementById('menu-piezas').style.display = 'block';
+}
+

@@ -99,3 +99,23 @@ td {
   display: none;
   z-index: 999;
 }
+
+.menu-piezas {
+  position: absolute;
+  right: 2rem;
+  top: 7rem;
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.menu-piezas img {
+  width: 40px;
+  height: 40px;
+  margin: 2px auto;
+  display: block;
+}
