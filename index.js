@@ -1,6 +1,7 @@
 // Importar Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
+import { get, child } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
 // Configuración de tu proyecto
 const firebaseConfig = {
@@ -45,4 +46,46 @@ document.getElementById('crearLobby').addEventListener('click', () => {
     navigator.clipboard.writeText(urlConLobby);
     alert("Enlace copiado");
   });
+});
+
+// Función para leer parámetros de URL
+function obtenerParametros() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    lobby: params.get("lobby"),
+    nombre: params.get("nombre")
+  };
+}
+
+// Verificar si hay datos en la URL al cargar la página
+window.addEventListener('load', async () => {
+  const { lobby, nombre } = obtenerParametros();
+
+  if (lobby && nombre) {
+    // Mostrar el lobby en vez del menú
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('lobby').style.display = 'block';
+    document.getElementById('tituloLobby').textContent = `Lobby #${lobby}`;
+
+    const lobbyRef = ref(database, 'lobbies/' + lobby);
+    const snapshot = await get(lobbyRef);
+
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+
+      // Si hay espacio, asignar al jugador2 si aún no está
+      if (!data.jugador2) {
+        await set(lobbyRef, {
+          jugador1: data.jugador1,
+          jugador2: nombre
+        });
+      }
+
+      document.getElementById('jugador1Nombre').textContent = data.jugador1;
+      document.getElementById('jugador2Nombre').textContent = data.jugador2 || nombre;
+    } else {
+      alert("Este lobby no existe.");
+      // Podrías redirigir o mostrar un mensaje
+    }
+  }
 });
