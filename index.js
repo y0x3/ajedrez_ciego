@@ -121,6 +121,17 @@ document.getElementById("crearLobby").addEventListener("click", () => {
   });
 });
 
+// 📋 Copiar enlace del lobby
+const urlLobby = `${window.location.origin}?lobby=${lobby}&nombre=`;
+
+document.getElementById("copiarLink").addEventListener("click", () => {
+  navigator.clipboard.writeText(urlLobby).then(() => {
+    alert("¡Enlace copiado! Pega esto a tu compa:");
+  }).catch(() => {
+    alert("No se pudo copiar el enlace.");
+  });
+});
+
 // 👥 Unirse a Lobby
 document.getElementById("unirseLobby").addEventListener("click", () => {
   const nombre = document.getElementById("nombreJugador2").value.trim();
