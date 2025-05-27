@@ -182,4 +182,4 @@ if (soyJugador1) {
   mostrarMenuPiezas('negro');
   document.getElementById('menu-piezas').style.display = 'block';
 }
-
+//noc
