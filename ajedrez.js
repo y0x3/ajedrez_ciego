@@ -74,6 +74,7 @@ let soyJugador1 = false; // Bandera para saber si soy el jugador 1
 let tiempo1 = 0;      // Tiempo restante jugador 1
 let tiempo2 = 0;      // Tiempo restante jugador 2
 let miColor = null; // Guardará el color asignado a este jugador
+let menuMostrado = false; // Bandera para mostrar el menú solo una vez
 
 // Escucha los cambios en el lobby en tiempo real
 onValue(lobbyRef, async (snapshot) => {
@@ -99,6 +100,13 @@ onValue(lobbyRef, async (snapshot) => {
     miColor = data.colores[nombre];
   }
 
+  // Mostrar el menú de piezas según el color asignado SOLO UNA VEZ
+  if (miColor && !menuMostrado) {
+    mostrarMenuPiezas(miColor);
+    document.getElementById('menu-piezas').style.display = 'block';
+    menuMostrado = true;
+  }
+
   // Actualiza los nombres y tiempos en la interfaz
   document.getElementById("nombre-j1").textContent = data.jugador1;
   document.getElementById("nombre-j2").textContent = data.jugador2;
@@ -117,12 +125,6 @@ onValue(lobbyRef, async (snapshot) => {
       msg.style.display = "none";
       iniciarTemporizador(data.turno);
     }, 2000);
-  }
-
-  // Mostrar el menú de piezas según el color asignado
-  if (miColor) {
-    mostrarMenuPiezas(miColor);
-    document.getElementById('menu-piezas').style.display = 'block';
   }
 });
 
@@ -224,14 +226,6 @@ function mostrarMenuPiezas(color) {
   });
 }
 
-// Muestra el menú de piezas solo para el jugador correspondiente
-if (soyJugador1) {
-  mostrarMenuPiezas('blanco');
-  document.getElementById('menu-piezas').style.display = 'block';
-} else {
-  mostrarMenuPiezas('negro');
-  document.getElementById('menu-piezas').style.display = 'block';
-}
 
 // Utilidad para saber si eres blanco o negro
 function soyBlanco() {
