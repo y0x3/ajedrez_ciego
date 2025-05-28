@@ -119,3 +119,11 @@ td {
   margin: 2px auto;
   display: block;
 }
+
+.rotado {
+  transform: rotate(180deg);
+}
+.rotado span, .rotado img, .rotado td, .rotado th {
+  transform: rotate(180deg);
+  display: inline-block;
+}

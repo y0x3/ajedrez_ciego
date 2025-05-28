@@ -105,6 +105,39 @@ onValue(lobbyRef, async (snapshot) => {
     mostrarMenuPiezas(miColor);
     document.getElementById('menu-piezas').style.display = 'block';
     menuMostrado = true;
+
+    // Mostrar nombres y tiempos en el HUD según el color
+    if (soyBlanco()) {
+      document.getElementById("nombre-j1").textContent = nombre;
+      document.getElementById("nombre-j2").textContent = data.jugador2;
+    } else {
+      document.getElementById("nombre-j1").textContent = data.jugador1;
+      document.getElementById("nombre-j2").textContent = nombre;
+    }
+
+    // Mostrar coordenadas y tablero según el color
+    mostrarCoordenadas();
+    generarTablero();
+
+    // Rotar visualmente el tablero y coordenadas si eres negras
+    const tableroElem = document.getElementById('tablero');
+    const letrasArriba = document.getElementById('letras-arriba');
+    const letrasAbajo = document.getElementById('letras-abajo');
+    const numerosIzquierda = document.getElementById('numeros-izquierda');
+    const numerosDerecha = document.getElementById('numeros-derecha');
+    if (soyNegro()) {
+      tableroElem.classList.add('rotado');
+      letrasArriba.classList.add('rotado');
+      letrasAbajo.classList.add('rotado');
+      numerosIzquierda.classList.add('rotado');
+      numerosDerecha.classList.add('rotado');
+    } else {
+      tableroElem.classList.remove('rotado');
+      letrasArriba.classList.remove('rotado');
+      letrasAbajo.classList.remove('rotado');
+      numerosIzquierda.classList.remove('rotado');
+      numerosDerecha.classList.remove('rotado');
+    }
   }
 
   // Actualiza los nombres y tiempos en la interfaz
@@ -233,4 +266,39 @@ function soyBlanco() {
 }
 function soyNegro() {
   return miColor === "negro";
+}
+
+function mostrarCoordenadas() {
+  let letrasArr = letras;
+  let numerosArr = numeros;
+  if (soyNegro()) {
+    letrasArr = [...letras].reverse();
+    numerosArr = [...numeros].reverse();
+  }
+  document.getElementById('letras-arriba').innerHTML = letrasArr.map(l => `<span>${l}</span>`).join('');
+  document.getElementById('letras-abajo').innerHTML = letrasArr.map(l => `<span>${l}</span>`).join('');
+  document.getElementById('numeros-izquierda').innerHTML = numerosArr.map(n => `<span>${n}</span>`).join('');
+  document.getElementById('numeros-derecha').innerHTML = numerosArr.map(n => `<span>${n}</span>`).join('');
+}
+
+function generarTablero() {
+  const tablero = document.getElementById("tablero");
+  tablero.innerHTML = '';
+  let letrasArr = letras;
+  let numerosArr = numeros;
+  if (soyNegro()) {
+    letrasArr = [...letras].reverse();
+    numerosArr = [...numeros].reverse();
+  }
+  for (let row = 0; row < 8; row++) {
+    const tr = document.createElement("tr");
+    for (let col = 0; col < 8; col++) {
+      const td = document.createElement("td");
+      const color = (row + col) % 2 === 0 ? 'white' : 'black';
+      td.classList.add('casilla', color);
+      td.id = `${letrasArr[col]}${numerosArr[row]}`;
+      tr.appendChild(td);
+    }
+    tablero.appendChild(tr);
+  }
 }
