@@ -1,7 +1,8 @@
+// Importa los módulos necesarios de Firebase para inicializar la app y manejar la base de datos en tiempo real
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-database.js";
 
-// Firebase config
+// Configuración de Firebase para conectar con tu proyecto
 const firebaseConfig = {
   apiKey: "AIzaSyBrRRbpqUToMUsfTb_XeAOMt_HcmHiDz14",
   authDomain: "ajedrez-ciego.firebaseapp.com",
@@ -13,38 +14,48 @@ const firebaseConfig = {
   measurementId: "G-S25HK9P8WW"
 };
 
+// Inicializa la app de Firebase y obtiene la referencia a la base de datos
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-//CREACION DE TABLERO DE AJEDREZ
+// =======================
+// CREACIÓN DEL TABLERO DE AJEDREZ
+// =======================
 
+// Letras y números para las coordenadas del tablero
 const letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 const numeros = [8, 7, 6, 5, 4, 3, 2, 1];
 
-// Coordenadas horizontales (letras)
+// Muestra las letras arriba y abajo del tablero
 document.getElementById('letras-arriba').innerHTML = letras.map(l => `<span>${l}</span>`).join('');
 document.getElementById('letras-abajo').innerHTML = letras.map(l => `<span>${l}</span>`).join('');
 
-// Coordenadas verticales (números)
+// Muestra los números a la izquierda y derecha del tablero
 document.getElementById('numeros-izquierda').innerHTML = numeros.map(n => `<span>${n}</span>`).join('');
 document.getElementById('numeros-derecha').innerHTML = numeros.map(n => `<span>${n}</span>`).join('');
 
-// Generar tablero (8x8)
+// Genera el tablero de 8x8 dinámicamente y asigna clases de color y un id único a cada casilla
 const tablero = document.getElementById("tablero");
 for (let row = 0; row < 8; row++) {
   const tr = document.createElement("tr");
   for (let col = 0; col < 8; col++) {
     const td = document.createElement("td");
-    const color = (row + col) % 2 === 0 ? 'white' : 'black';
+    const color = (row + col) % 2 === 0 ? 'white' : 'black'; // Alterna colores
     td.classList.add('casilla', color);
-    td.id = `${letras[col]}${numeros[row]}`;
+    td.id = `${letras[col]}${numeros[row]}`; // Ejemplo: A8, B8, etc.
     tr.appendChild(td);
   }
   tablero.appendChild(tr);
 }
 
-//LOGICA DEL TABLERO
+// =======================
+// LÓGICA DEL TABLERO Y TEMPORIZADOR
+// =======================
+
+// Bandera para saber si el temporizador ya inició
 let temporizadorIniciado = false;
+
+// Obtiene los parámetros de la URL (lobby y nombre del jugador)
 function obtenerParametros() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -53,21 +64,42 @@ function obtenerParametros() {
   };
 }
 
+// Extrae los parámetros y prepara la referencia al lobby en la base de datos
 const { lobby, nombre } = obtenerParametros();
 const db = getDatabase();
 const lobbyRef = ref(db, `lobbies/${lobby}`);
 
-let intervalo;
-let soyJugador1 = false;
-let tiempo1 = 0;
-let tiempo2 = 0;
+let intervalo;        // Intervalo del temporizador
+let soyJugador1 = false; // Bandera para saber si soy el jugador 1
+let tiempo1 = 0;      // Tiempo restante jugador 1
+let tiempo2 = 0;      // Tiempo restante jugador 2
+let miColor = null; // Guardará el color asignado a este jugador
 
-onValue(lobbyRef, (snapshot) => {
+// Escucha los cambios en el lobby en tiempo real
+onValue(lobbyRef, async (snapshot) => {
   const data = snapshot.val();
   if (!data) return;
 
-  soyJugador1 = data.jugador1 === nombre;
+  // Si ambos jugadores están presentes y aún no hay colores asignados, los asignamos aleatoriamente
+  if (data.jugador1 && data.jugador2 && !data.colores) {
+    // Solo uno de los clientes debe hacer la asignación
+    const nombres = [data.jugador1, data.jugador2];
+    if (Math.random() < 0.5) nombres.reverse(); // Aleatoriza el orden
+    const colores = {};
+    colores[nombres[0]] = "blanco";
+    colores[nombres[1]] = "negro";
+    // Guardamos en Firebase
+    await set(ref(db, `lobbies/${lobby}/colores`), colores);
+    // Esperamos a que el onValue se dispare de nuevo con los colores
+    return;
+  }
 
+  // Asigna el color a este cliente según lo guardado en Firebase
+  if (data.colores && data.colores[nombre]) {
+    miColor = data.colores[nombre];
+  }
+
+  // Actualiza los nombres y tiempos en la interfaz
   document.getElementById("nombre-j1").textContent = data.jugador1;
   document.getElementById("nombre-j2").textContent = data.jugador2;
   tiempo1 = data.tiempo1;
@@ -75,6 +107,7 @@ onValue(lobbyRef, (snapshot) => {
 
   actualizarTiempos();
 
+  // Si el juego debe iniciar y el temporizador aún no ha iniciado, lo inicia
   if (data.iniciar && !temporizadorIniciado) {
     temporizadorIniciado = true;
 
@@ -85,19 +118,28 @@ onValue(lobbyRef, (snapshot) => {
       iniciarTemporizador(data.turno);
     }, 2000);
   }
+
+  // Mostrar el menú de piezas según el color asignado
+  if (miColor) {
+    mostrarMenuPiezas(miColor);
+    document.getElementById('menu-piezas').style.display = 'block';
+  }
 });
 
+// Actualiza los tiempos en pantalla
 function actualizarTiempos() {
   document.getElementById("tiempo-j1").textContent = formatearTiempo(tiempo1);
   document.getElementById("tiempo-j2").textContent = formatearTiempo(tiempo2);
 }
 
+// Convierte los segundos a formato mm:ss
 function formatearTiempo(segundos) {
   const m = Math.floor(segundos / 60).toString().padStart(2, '0');
   const s = (segundos % 60).toString().padStart(2, '0');
   return `${m}:${s}`;
 }
 
+// Inicia el temporizador y descuenta el tiempo del jugador que tiene el turno
 function iniciarTemporizador(turnoActual) {
   clearInterval(intervalo);
 
@@ -111,6 +153,7 @@ function iniciarTemporizador(turnoActual) {
     updateTiemposEnFirebase(tiempo1, tiempo2, turnoActual);
     actualizarTiempos();
 
+    // Si algún jugador se queda sin tiempo, termina el juego
     if (tiempo1 <= 0 || tiempo2 <= 0) {
       clearInterval(intervalo);
       alert("¡Tiempo agotado!");
@@ -118,6 +161,7 @@ function iniciarTemporizador(turnoActual) {
   }, 1000);
 }
 
+// Actualiza los tiempos y el turno en Firebase
 function updateTiemposEnFirebase(t1, t2, turnoActual) {
   set(ref(db, `lobbies/${lobby}`), {
     tiempo1: t1,
@@ -129,7 +173,11 @@ function updateTiemposEnFirebase(t1, t2, turnoActual) {
   });
 }
 
-//cambiar turno al hacer click en una casilla
+// =======================
+// CAMBIO DE TURNO AL HACER CLICK EN UNA CASILLA
+// =======================
+
+// Permite cambiar el turno al hacer click en cualquier casilla del tablero
 document.querySelectorAll("td").forEach(casilla => {
   casilla.addEventListener("click", () => {
     // Solo puede cambiar turno quien tiene el turno actual
@@ -138,9 +186,11 @@ document.querySelectorAll("td").forEach(casilla => {
   });
 });
 
+// =======================
+// MENÚ DE PIEZAS
+// =======================
 
-//LOGICA DE MENU DE PIEZAS
-// Función para agregar el menú de piezas
+// Listas de piezas blancas y negras con su cantidad
 const piezasBlancas = [
   { nombre: 'PeonBlanco.png', cantidad: 8 },
   { nombre: 'TorreBlanca.png', cantidad: 2 },
@@ -159,6 +209,7 @@ const piezasNegras = [
   { nombre: 'ReynaNegra.png', cantidad: 1 }
 ];
 
+// Muestra el menú de piezas correspondiente al color del jugador
 function mostrarMenuPiezas(color) {
   const menu = document.getElementById('menu-piezas');
   menu.innerHTML = '';
@@ -173,8 +224,7 @@ function mostrarMenuPiezas(color) {
   });
 }
 
-
-// Mostrar solo el menú correspondiente al jugador
+// Muestra el menú de piezas solo para el jugador correspondiente
 if (soyJugador1) {
   mostrarMenuPiezas('blanco');
   document.getElementById('menu-piezas').style.display = 'block';
@@ -182,4 +232,11 @@ if (soyJugador1) {
   mostrarMenuPiezas('negro');
   document.getElementById('menu-piezas').style.display = 'block';
 }
-//noc
+
+// Utilidad para saber si eres blanco o negro
+function soyBlanco() {
+  return miColor === "blanco";
+}
+function soyNegro() {
+  return miColor === "negro";
+}
